@@ -1,0 +1,156 @@
+package net.boeckling.turbocontainers;
+
+import static java.util.stream.Collectors.toList;
+
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import net.boeckling.turbocontainers.api.annotations.Named;
+import net.boeckling.turbocontainers.parameter.*;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
+import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.platform.commons.util.AnnotationUtils;
+import org.testcontainers.containers.GenericContainer;
+
+public class JUnitParameterResolver implements ParameterResolver {
+  private final List<ParameterProvider> paramProviders;
+  private final Function<Optional<Object>, Collection<GenericContainer<?>>> containerProvider;
+
+  public JUnitParameterResolver(
+    List<ParameterProvider> paramProviders,
+    Function<Optional<Object>, Collection<GenericContainer<?>>> containerProvider
+  ) {
+    this.paramProviders = paramProviders;
+    this.containerProvider = containerProvider;
+  }
+
+  @Override
+  public boolean supportsParameter(
+    ParameterContext param,
+    ExtensionContext ext
+  )
+    throws ParameterResolutionException {
+    ParameterDescriptor desc = new ParameterDescriptorImpl(
+      param.getParameter().getType()
+    );
+    return paramProviders
+      .stream()
+      .anyMatch(prov -> prov.supportsParameter(desc));
+  }
+
+  @Override
+  public Object resolveParameter(
+    ParameterContext paramContext,
+    ExtensionContext ext
+  )
+    throws ParameterResolutionException {
+    ParameterDescriptor paramDesc = new ParameterDescriptorImpl(
+      paramContext.getParameter().getType()
+    );
+
+    ParameterProvider paramProvider = paramProviders
+      .stream()
+      .filter(r -> r.supportsParameter(paramDesc))
+      .findFirst()
+      .orElseThrow(
+        () -> new ParameterResolutionException("no ParameterProvider found")
+      );
+
+    List<GenericContainer<?>> containers = containerProvider
+      .apply(ext.getTestInstance())
+      .stream()
+      .filter(paramProvider::supportsContainer)
+      .collect(toList());
+
+    if (containers.isEmpty()) {
+      throw new ParameterResolutionException(
+        "no Container found from which to construct a " +
+        paramContext.getParameter().getType().getName()
+      );
+    }
+
+    if (containers.size() == 1) {
+      ExecutionEnvironment env = new ExecutionEnvironmentImpl(
+        containers.get(0),
+        ExecutionEnvironment.Phase.RUN_TEST
+      );
+      try {
+        return paramProvider.resolveParameter(paramDesc, env);
+      } catch (ParameterResolutionFailedException e) {
+        throw new ParameterResolutionException(
+          "Parameter resolution failed",
+          e
+        );
+      }
+    }
+
+    Named named = paramContext
+      .findAnnotation(Named.class)
+      .orElseThrow(
+        () ->
+          new ParameterResolutionException(
+            "Ambiguous parameter in " +
+            paramContext.getDeclaringExecutable() +
+            ", found " +
+            containers.size() +
+            " potential container matches. Use the " +
+            Named.class.getName() +
+            " annotation to disambiguate."
+          )
+      );
+
+    List<Field> annotatedFields = AnnotationUtils.findAnnotatedFields(
+      ext.getRequiredTestClass(),
+      Named.class,
+      f -> f.getAnnotation(Named.class).value().equals(named.value())
+    );
+
+    if (annotatedFields.isEmpty()) {
+      throw new ParameterResolutionException(
+        "Found " +
+        Named.class.getName() +
+        " annotation on parameter " +
+        paramContext.getDeclaringExecutable() +
+        " with value " +
+        named.value() +
+        ", but no matching container field."
+      );
+    }
+
+    if (annotatedFields.size() == 1) {
+      ExecutionEnvironment env = new ExecutionEnvironmentImpl(
+        containers.get(0),
+        ExecutionEnvironment.Phase.RUN_TEST
+      );
+
+      try {
+        return paramProvider.resolveParameter(paramDesc, env);
+      } catch (ParameterResolutionFailedException e) {
+        throw new ParameterResolutionException(
+          "Parameter resolution failed",
+          e
+        );
+      }
+    }
+
+    throw new ParameterResolutionException(
+      "Found " +
+      Named.class.getName() +
+      " annotation on parameter " +
+      paramContext.getDeclaringExecutable() +
+      " with value " +
+      named.value() +
+      ", but with " +
+      annotatedFields.size() +
+      " matching container fields."
+    );
+  }
+
+  public List<ParameterProvider> getParamProviders() {
+    return paramProviders;
+  }
+}

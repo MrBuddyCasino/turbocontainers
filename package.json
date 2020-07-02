@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "husky": "4.2.5",
+    "prettier": "2.0.5",
+    "prettier-plugin-java": "0.8.0",
+    "pretty-quick": "2.0.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged --pattern 'src/**/*.java' --pattern '**/*.json' --pattern '**/*.md' --pattern '**/*.yml'"
+    }
+  }
+}

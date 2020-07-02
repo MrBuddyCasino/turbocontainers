@@ -1,0 +1,3 @@
+CREATE DATABASE sample1;
+\connect sample1
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
