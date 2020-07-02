@@ -9,6 +9,35 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <name>Turbocontainers</name>
+  <description>
+    A Testcontainer wrapper that keeps containers running
+    and resets state between tests.
+  </description>
+  <url>https://github.com/MrBuddyCasino/turbocontainers</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/licenses/MIT</url>
+    </license>
+  </licenses>
+
+  <scm>
+    <connection>scm:git:git://github.com/MrBuddyCasino/turbocontainers.git</connection>
+    <developerConnection>scm:git:ssh://github.com:MrBuddyCasino/turbocontainers.git</developerConnection>
+    <url>https://github.com/MrBuddyCasino/turbocontainers/tree/master</url>
+  </scm>
+
+  <developers>
+    <developer>
+      <name>Michael Böckling</name>
+      <email>turbocontainers@boeckling.net</email>
+      <organization>-</organization>
+      <organizationUrl>https://github.com/MrBuddyCasino</organizationUrl>
+    </developer>
+  </developers>
+
   <properties>
     <version>1.0-SNAPSHOT</version>
     <testcontainer-version>1.14.3</testcontainer-version>
@@ -47,6 +76,46 @@
       <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.22.2</version>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
