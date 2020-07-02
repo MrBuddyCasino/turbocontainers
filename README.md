@@ -138,6 +138,12 @@ Parameters: `AmazonSNS`, `SnsClient`
 Deletes queues between tests.
 Parameters: `AmazonSQS`, `SqsClient`
 
+### mongodb
+Restores a snapshot between tests.
+Parameters: `MongoClient`
+
+Provides the `MongoScript` tool to run the `mongo` cli.
+
 ### postgres
 Not needed for JDBC-only operations.
 Provides a `PsqlScript` class to execute the psql cli tool:
