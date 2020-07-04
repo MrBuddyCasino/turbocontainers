@@ -5,6 +5,9 @@ import net.boeckling.turbocontainers.api.init.internal.InitService;
 import net.boeckling.turbocontainers.common.ServiceLoaderUtil;
 import org.testcontainers.containers.GenericContainer;
 
+/**
+ * Convenience helper to initialise a container with some data before test are run.
+ */
 public interface Init {
   static <C extends GenericContainer<?>> Builder<C> container(C container) {
     return new Builder<>(container);
