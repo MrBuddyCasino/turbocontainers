@@ -62,57 +62,35 @@ Every container needs explicit support. Currently supported:
 ## Container Initialization
 
 You can use a Testcontainer directly, or use a convenience initializer wrapper.
-It supports a `Consumer<Testcontainer>` or a `BiConsumer<Testcontainer, Client>`
-initializer.
+It supports a `Consumer<InitializerContext>` initializer.
 
-The second parameter in the `BiConsumer` is module-specific and can be a `DataSource` or a `MongoClient`, for example. 
-It is automatically created and configured to target the respective container. 
-
-Example with `BiConsumer`:
+Example:
 ```
 public class MongodbConfiguration {
-
   public static final int MONGO_PORT = 27017;
   public static final String DB_NAME = "database";
-
   public static final MongoDBContainer CONTAINER = Init
-    .<MongoDBContainer, MongoClient>container(
+    .container(
       new MongoDBContainer()
+        .withNetwork(Network.SHARED)
+        .withNetworkAliases("mongo")
+        .withExposedPorts(MONGO_PORT)
         .withEnv("MONGO_INITDB_DATABASE", DB_NAME)
+        .withCommand("--bind_ip_all")
     )
     .with(
-      (con, client) ->
-        client
+      ctx ->
+        ctx
+          .client(MongoClient.class)
           .getDatabase(DB_NAME)
           .getCollection("collection")
           .insertOne(new Document("key", "value"))
     );
 }
 ```
-As `Consumer` without the second parameter:
-```
-public class MongodbConfiguration {
 
-  public static final int MONGO_PORT = 27017;
-  public static final String DB_NAME = "database";
-
-  public static final MongoDBContainer CONTAINER = container(
-      new MongoDBContainer()
-        .withEnv("MONGO_INITDB_DATABASE", DB_NAME)
-    )
-    .with(MongodbConfiguration::initialize);
-
-  // can also use a method reference instead of a lambda
-  static void initialize(MongoDBContainer container) {
-    String dbName = container.getEnvMap().get("MONGO_INITDB_DATABASE");
-    MongoClient client = MongoClients.create(container.getReplicaSetUrl());
-    client
-      .getDatabase(dbName)
-      .getCollection("collection")
-      .insertOne(new Document("key", "value"));
-  }
-}
-```
+Note how the `InitializerContext` provides a `.client(<ClientClass>)` method to generate a
+client for the current container.
 
 ## Modules
 
@@ -126,7 +104,7 @@ The underlying connection cannot be committed or closed.
 
 ### kafka
 Provides the `KafkaConsumer` parameter type.
-Topics are deleted between each test run.
+Deletes topics between each test run.
 
 ### localstack
 Supported services:
