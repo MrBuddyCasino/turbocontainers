@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.MongoDBContainer;
 
 @TurboContainers
-public class MongodbListenerTest {
+public class MongodbStateManagerTest {
   @TurboContainer
   final MongoDBContainer mongodb = MongodbConfiguration.CONTAINER;
 

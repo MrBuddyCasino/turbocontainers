@@ -36,7 +36,7 @@ import org.testcontainers.lifecycle.Startable;
  *   <li>reset container state between each test</li>
  * </ul>
  * <p>
- * This is meant to speed up tests by avoiding constant shutdown & restart of containers,
+ * This is meant to speed up tests by avoiding constant shutdown and restart of containers,
  * while still isolating tests between each other.
  * <p>
  * Use it by adding this to your test class, adding containers as needed:
@@ -73,6 +73,9 @@ public class TurboContainerServiceImpl implements JUnitTurboContainerService {
       .forEach(eventPublisher::publishEvent);
   }
 
+  /**
+   * If a container depends on other containers, make sure they emit events.
+   */
   private void deepPatchStrategy(GenericContainer<?> container) {
     container
       .getDependencies()
@@ -87,6 +90,7 @@ public class TurboContainerServiceImpl implements JUnitTurboContainerService {
     }
 
     if (!(strategy instanceof InitializingStartupCheckStrategy)) {
+      // init is a no-op
       InitializingStartupCheckStrategy.wrapStrategy(container);
     }
     EventEmittingStartupCheckStrategy.wrapStrategy(container, eventPublisher);

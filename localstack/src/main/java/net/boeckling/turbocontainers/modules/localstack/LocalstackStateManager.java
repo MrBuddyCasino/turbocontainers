@@ -7,13 +7,13 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
-import net.boeckling.turbocontainers.events.LifecycleListener;
+import net.boeckling.turbocontainers.state.InitAlwaysStateManager;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer.Service;
 
-public class LocalstackLifecycleListener
-  implements LifecycleListener<LocalStackContainer> {
+public class LocalstackStateManager
+  implements InitAlwaysStateManager<LocalStackContainer> {
   private final Set<Service> supportedServices = EnumSet.of(SQS, SNS, S3);
 
   private final S3ServiceHandler s3Handler = new S3ServiceHandler();
@@ -32,38 +32,17 @@ public class LocalstackLifecycleListener
   }
 
   @Override
-  public void afterContainerInitialized(LocalStackContainer container) {
+  public void wipe(LocalStackContainer container) {
     for (Service service : getServices(container)) {
       switch (service) {
         case S3:
-          s3Handler.afterContainerInitialized(container);
+          s3Handler.wipe(container);
           break;
         case SNS:
-          snsHandler.afterContainerInitialized(container);
+          snsHandler.wipe(container);
           break;
         case SQS:
-          sqsHandler.afterContainerInitialized(container);
-          break;
-        default:
-          throw new UnsupportedOperationException(
-            "Unsupported service: " + service.getLocalStackName()
-          );
-      }
-    }
-  }
-
-  @Override
-  public void beforeEachTest(LocalStackContainer container) {
-    for (Service service : getServices(container)) {
-      switch (service) {
-        case S3:
-          s3Handler.beforeEachTest(container);
-          break;
-        case SNS:
-          snsHandler.beforeEachTest(container);
-          break;
-        case SQS:
-          sqsHandler.beforeEachTest(container);
+          sqsHandler.wipe(container);
           break;
         default:
           throw new UnsupportedOperationException(

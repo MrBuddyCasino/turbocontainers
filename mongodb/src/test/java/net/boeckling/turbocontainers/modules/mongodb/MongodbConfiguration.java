@@ -1,12 +1,14 @@
 package net.boeckling.turbocontainers.modules.mongodb;
 
 import com.mongodb.client.MongoClient;
+import java.util.function.BiConsumer;
 import net.boeckling.turbocontainers.api.init.Init;
 import org.bson.Document;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Network;
 
-public class MongodbConfiguration {
+public class MongodbConfiguration
+  implements BiConsumer<MongoDBContainer, MongoClient> {
   public static final int MONGO_PORT = 27017;
   public static final String DB_NAME = "database";
   public static final MongoDBContainer CONTAINER = Init
@@ -19,11 +21,13 @@ public class MongodbConfiguration {
         .withCommand("--bind_ip_all")
         .dependsOn()
     )
-    .with(
-      (con, client) ->
-        client
-          .getDatabase(DB_NAME)
-          .getCollection("collection")
-          .insertOne(new Document("key", "value"))
-    );
+    .with(new MongodbConfiguration());
+
+  @Override
+  public void accept(MongoDBContainer container, MongoClient mongoClient) {
+    mongoClient
+      .getDatabase(DB_NAME)
+      .getCollection("collection")
+      .insertOne(new Document("key", "value"));
+  }
 }

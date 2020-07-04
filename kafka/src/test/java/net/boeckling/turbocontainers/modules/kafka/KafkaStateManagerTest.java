@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.KafkaContainer;
 
 @TurboContainers
-public class KafkaListenerTest {
+public class KafkaStateManagerTest {
   public static final String PER_TEST_TOPIC = "topic";
 
   @TurboContainer

@@ -1,5 +1,7 @@
 package net.boeckling.turbocontainers.events;
 
+import org.testcontainers.containers.Container;
+
 public interface EventPublisher {
-  void publishEvent(ContainerEvent event);
+  <C extends Container<?>> void publishEvent(ContainerEvent<C> event);
 }

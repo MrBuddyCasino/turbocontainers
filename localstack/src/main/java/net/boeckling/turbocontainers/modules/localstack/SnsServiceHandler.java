@@ -7,58 +7,20 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sns.model.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import net.boeckling.turbocontainers.events.LifecycleListener;
-import org.testcontainers.containers.Container;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.services.sns.SnsClient;
 
-public class SnsServiceHandler
-  implements LifecycleListener<LocalStackContainer> {
-  private static final Map<String, SnsState> CONTAINER_STATE = new HashMap<>();
-
+public class SnsServiceHandler {
   private AmazonSNS sns;
 
-  static class SnsState {
-    private final List<String> endpointsToPreserve = new ArrayList<>();
-    private final List<String> appsToPreserve = new ArrayList<>();
-    private final List<String> topicsToPreserve = new ArrayList<>();
-  }
-
-  @Override
-  public boolean supportsContainer(Container<?> container) {
-    return container instanceof LocalStackContainer;
-  }
-
-  @Override
-  public void afterContainerInitialized(LocalStackContainer container) {
-    SnsState snsState = new SnsState();
-    snsState.topicsToPreserve.addAll(getTopicArns(container));
-    snsState.appsToPreserve.addAll(getPlatformAppArns(container));
-
-    for (String app : snsState.appsToPreserve) {
-      List<String> endpoints = getEndpointArns(container, app);
-      snsState.endpointsToPreserve.addAll(endpoints);
-    }
-    CONTAINER_STATE.put(container.getContainerId(), snsState);
-  }
-
-  @Override
-  public void beforeEachTest(LocalStackContainer container) {
+  public void wipe(LocalStackContainer container) {
     AmazonSNS sns = getSns(container);
-    SnsState snsState = CONTAINER_STATE.getOrDefault(
-      container.getContainerId(),
-      new SnsState()
-    );
 
     List<String> topicsToDelete = getTopicArns(container);
-    topicsToDelete.removeAll(snsState.topicsToPreserve);
     topicsToDelete.forEach(sns::deleteTopic);
 
     List<String> appsToDelete = getPlatformAppArns(container);
-    appsToDelete.removeAll(snsState.appsToPreserve);
     for (String app : appsToDelete) {
       DeletePlatformApplicationRequest request = new DeletePlatformApplicationRequest()
       .withPlatformApplicationArn(app);
@@ -70,7 +32,6 @@ public class SnsServiceHandler
     for (String app : apps) {
       endpointsToDelete.addAll(getEndpointArns(container, app));
     }
-    endpointsToDelete.removeAll(snsState.endpointsToPreserve);
 
     for (String endpoint : endpointsToDelete) {
       DeleteEndpointRequest request = new DeleteEndpointRequest()

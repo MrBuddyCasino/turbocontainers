@@ -54,7 +54,9 @@ public class InitServiceImpl implements InitService {
 
     for (ParameterProvider provider : paramProviders) {
       if (provider.supportsParameter(desc)) {
-        return (S) provider.resolveParameter(desc, env);
+        @SuppressWarnings("unchecked")
+        S param = (S) provider.resolveParameter(desc, env);
+        return param;
       }
     }
     return null;
@@ -66,30 +68,48 @@ public class InitServiceImpl implements InitService {
       .getGenericInterfaces()) {
       // this genericInterface is the type-specific subclass of BiConsumer
       if (genericInterface instanceof Class) {
-        for (Type anInterface : (
-          (Class<?>) genericInterface
-        ).getGenericInterfaces()) {
-          // the actual BiConsumer
-          if (anInterface instanceof ParameterizedType) {
-            Type[] actualTypeArguments =
-              ((ParameterizedType) anInterface).getActualTypeArguments();
-            if (actualTypeArguments.length == 2) {
-              Type type = actualTypeArguments[1];
-              if (type instanceof Class) {
-                return (Class<?>) type;
-              }
-              if (type instanceof ParameterizedType) {
-                Type rawType = ((ParameterizedType) type).getRawType();
-                if (rawType instanceof Class) {
-                  return (Class<?>) rawType;
-                }
-              }
-            }
-          }
-        }
+        Class<?> type = handleClass((Class<?>) genericInterface);
+        if (type != null) return type;
+      }
+
+      if (genericInterface instanceof ParameterizedType) {
+        Class<?> type = handleParameterizedType(
+          (ParameterizedType) genericInterface
+        );
+        if (type != null) return type;
       }
     }
 
+    return null;
+  }
+
+  private Class<?> handleClass(Class<?> genericInterface) {
+    for (Type anInterface : genericInterface.getGenericInterfaces()) {
+      // the actual BiConsumer
+      if (anInterface instanceof ParameterizedType) {
+        Class<?> type = handleParameterizedType(
+          (ParameterizedType) anInterface
+        );
+        if (type != null) return type;
+      }
+    }
+    return null;
+  }
+
+  private Class<?> handleParameterizedType(ParameterizedType anInterface) {
+    Type[] actualTypeArguments = anInterface.getActualTypeArguments();
+    if (actualTypeArguments.length == 2) {
+      Type type = actualTypeArguments[1];
+      if (type instanceof Class) {
+        return (Class<?>) type;
+      }
+      if (type instanceof ParameterizedType) {
+        Type rawType = ((ParameterizedType) type).getRawType();
+        if (rawType instanceof Class) {
+          return (Class<?>) rawType;
+        }
+      }
+    }
     return null;
   }
 }

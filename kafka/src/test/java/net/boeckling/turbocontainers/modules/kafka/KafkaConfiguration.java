@@ -1,10 +1,12 @@
 package net.boeckling.turbocontainers.modules.kafka;
 
+import java.util.function.BiConsumer;
 import net.boeckling.turbocontainers.api.init.Init;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.testcontainers.containers.KafkaContainer;
 
-public class KafkaConfiguration {
+public class KafkaConfiguration
+  implements BiConsumer<KafkaContainer, KafkaConsumer<String, String>> {
   static final String INIT_TOPIC = "init_topic";
   static final KafkaContainer CONTAINER = Init
     .<KafkaContainer, KafkaConsumer<String, String>>container(
@@ -15,5 +17,13 @@ public class KafkaConfiguration {
         .withEnv("KAFKA_CONFLUENT_SUPPORT_METRICS_ENABLE", "false")
     )
     // triggers topic creation
-    .with((_ignored, consumer) -> consumer.partitionsFor(INIT_TOPIC));
+    .with(new KafkaConfiguration());
+
+  @Override
+  public void accept(
+    KafkaContainer container,
+    KafkaConsumer<String, String> consumer
+  ) {
+    consumer.partitionsFor(INIT_TOPIC);
+  }
 }

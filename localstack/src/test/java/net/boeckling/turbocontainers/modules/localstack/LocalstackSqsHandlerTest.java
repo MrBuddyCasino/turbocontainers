@@ -42,8 +42,8 @@ public class LocalstackSqsHandlerTest {
   }
 
   @Test
-  @Order(3)
-  //@Disabled
+  @Order(4)
+  @Disabled
   void clientv2_shouldQueryData_successfully(SqsClient sqs) {
     assertThat(sqs.getQueueUrl(b -> b.queueName(INIT_QUEUE_NAME)).queueUrl())
       .isNotBlank();

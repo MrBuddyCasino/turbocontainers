@@ -7,7 +7,7 @@ public class MongodbModule implements Module {
 
   @Override
   public void setupModule(SetupContext context) {
-    context.addLifecycleListener(new MongodbListener());
+    context.addLifecycleListener(new MongodbStateManager());
     context.addParameterProvider(new MongodbParamProvider());
   }
 }

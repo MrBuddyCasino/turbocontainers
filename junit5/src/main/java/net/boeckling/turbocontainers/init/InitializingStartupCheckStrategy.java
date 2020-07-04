@@ -10,7 +10,12 @@ import org.testcontainers.containers.Accessor;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
 
-public class InitializingStartupCheckStrategy<C extends GenericContainer<?>, S>
+/**
+ * A container can depend on other containers, some of which might be started in parallel.
+ * Making the init function part of the {@link StartupCheckStrategy} is a good way
+ * to ensure those dependencies are initialized first and avoid race conditions.
+ */
+public class InitializingStartupCheckStrategy<C extends GenericContainer<?>>
   extends StartupCheckStrategy {
   private static final Logger LOGGER = LoggerFactory.getLogger(
     InitializingStartupCheckStrategy.class
@@ -55,13 +60,20 @@ public class InitializingStartupCheckStrategy<C extends GenericContainer<?>, S>
   }
 
   /**
+   * Function that initializes this container.
+   */
+  public Runnable getInitializer() {
+    return initializer;
+  }
+
+  /**
    * No initializer: wrap with no-op.
    */
   public static <C extends GenericContainer<?>> void wrapStrategy(C container) {
     wrapStrategy(container, () -> {});
   }
 
-  public static <C extends GenericContainer<?>, S> void wrapStrategy(
+  public static <C extends GenericContainer<?>> void wrapStrategy(
     C container,
     Runnable r
   ) {
@@ -74,7 +86,7 @@ public class InitializingStartupCheckStrategy<C extends GenericContainer<?>, S>
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    InitializingStartupCheckStrategy<?, ?> that = (InitializingStartupCheckStrategy<?, ?>) o;
+    InitializingStartupCheckStrategy<?> that = (InitializingStartupCheckStrategy<?>) o;
     return (
       hasInitialized == that.hasInitialized &&
       container.equals(that.container) &&

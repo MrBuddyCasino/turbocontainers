@@ -35,10 +35,14 @@ public class EventEmittingStartupCheckStrategy extends StartupCheckStrategy {
     if (startupStatus == SUCCESSFUL && (!hasInitialized)) {
       hasInitialized = true;
       eventPublisher.publishEvent(
-        new AfterContainerInitializedEvent(container)
+        new AfterContainerInitializedEvent<>(container)
       );
     }
     return startupStatus;
+  }
+
+  public StartupCheckStrategy getDelegate() {
+    return delegate;
   }
 
   public static void wrapStrategy(

@@ -9,11 +9,17 @@ public interface LifecycleListener<C extends Container<?>> {
   /**
    * Opportunity to initialize.
    */
-  default void beforeContainerInitialized(C container) {}
+  default void beforeContainerInitialized(LifecycleEvent<C> event) {}
 
-  default void afterContainerInitialized(C container) {}
+  /**
+   * Opportunity to eg take snapshots to avoid re-initialization.
+   */
+  default void afterContainerInitialized(LifecycleEvent<C> event) {}
 
-  default void beforeEachTest(C container) {}
+  /**
+   * Reset container state.
+   */
+  default void beforeEachTest(LifecycleEvent<C> event) {}
 
   /**
    * Creates an init-only listener.
@@ -30,8 +36,8 @@ public interface LifecycleListener<C extends Container<?>> {
       }
 
       @Override
-      public void beforeContainerInitialized(C container) {
-        initializer.accept(container);
+      public void beforeContainerInitialized(LifecycleEvent<C> event) {
+        initializer.accept(event.getContainer());
       }
     };
   }

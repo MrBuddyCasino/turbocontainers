@@ -22,13 +22,13 @@ public class JdbcParameterProvider extends SimpleParamProvider {
       throw new IllegalArgumentException();
     }
 
-    JdbcDatabaseContainer<?> jdbc = tryCast(
+    JdbcDatabaseContainer<?> container = tryCast(
       JdbcDatabaseContainer.class,
       env.getContainer()
     );
 
     if (ds == null) {
-      ds = new JdbcContainerDataSource(jdbc);
+      ds = new JdbcContainerDataSource(container);
     }
 
     if (env.getPhase() == ExecutionEnvironment.Phase.RUN_TEST) {

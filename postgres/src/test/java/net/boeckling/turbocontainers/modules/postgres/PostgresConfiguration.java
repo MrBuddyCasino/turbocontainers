@@ -21,7 +21,7 @@ public class PostgresConfiguration {
         .withPassword("postgres")
     )
     .with(
-      (con, ds) ->
+      con ->
         PsqlScript
           .of(Script.of(Paths.get("src/test/resources/psql.sql")))
           .runIn(con)

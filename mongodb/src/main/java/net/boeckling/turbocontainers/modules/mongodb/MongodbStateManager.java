@@ -1,11 +1,12 @@
 package net.boeckling.turbocontainers.modules.mongodb;
 
-import net.boeckling.turbocontainers.events.LifecycleListener;
 import net.boeckling.turbocontainers.modules.cli.Script;
+import net.boeckling.turbocontainers.state.InitOnceStateManager;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.MongoDBContainer;
 
-public class MongodbListener implements LifecycleListener<MongoDBContainer> {
+public class MongodbStateManager
+  implements InitOnceStateManager<MongoDBContainer> {
   private final Script mongoDump = Script.of("mongodump");
   private final Script mongoRestore = Script.of("mongorestore", "--dir=dump");
 
@@ -15,12 +16,12 @@ public class MongodbListener implements LifecycleListener<MongoDBContainer> {
   }
 
   @Override
-  public void afterContainerInitialized(MongoDBContainer container) {
+  public void takeSnapshot(MongoDBContainer container) {
     mongoDump.runIn(container);
   }
 
   @Override
-  public void beforeEachTest(MongoDBContainer container) {
+  public void restoreSnapshot(MongoDBContainer container) {
     mongoRestore.runIn(container);
   }
 }

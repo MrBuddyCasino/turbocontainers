@@ -44,6 +44,11 @@ A Turbocontainer has the following lifecycle:
 * execution of the next test
 * repeat until tests are finished
 
+It is possible that the container state is reset completely between each test,
+with the initialization being re-run, or that the 
+initialization step is executed only once. This depends on how easy it is
+to implement correctly.
+
 ## Supported containers
 
 Every container needs explicit support. Currently supported:

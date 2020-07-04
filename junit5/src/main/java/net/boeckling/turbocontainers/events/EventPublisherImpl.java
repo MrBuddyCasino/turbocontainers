@@ -1,6 +1,7 @@
 package net.boeckling.turbocontainers.events;
 
 import net.boeckling.turbocontainers.modules.ModuleRegistry;
+import org.testcontainers.containers.Container;
 
 public class EventPublisherImpl implements EventPublisher {
   private final ModuleRegistry registry;
@@ -9,17 +10,21 @@ public class EventPublisherImpl implements EventPublisher {
     this.registry = registry;
   }
 
-  public void publishEvent(ContainerEvent event) {
-    for (LifecycleListener listener : registry.getLifecycleListeners()) {
+  public <C extends Container<?>> void publishEvent(ContainerEvent<C> event) {
+    for (LifecycleListener<?> listener : registry.getLifecycleListeners()) {
       if (!listener.supportsContainer(event.getContainer())) {
         continue;
       }
 
+      @SuppressWarnings("unchecked")
+      LifecycleListener<C> l = (LifecycleListener<C>) listener;
+
+      LifecycleEvent<C> evt = new LifecycleEventImpl<>(event.getContainer());
       if (event instanceof AfterContainerInitializedEvent) {
-        listener.afterContainerInitialized(event.getContainer());
+        l.afterContainerInitialized(evt);
       } else {
         if (event instanceof BeforeEachTestEvent) {
-          listener.beforeEachTest(event.getContainer());
+          l.beforeEachTest(evt);
         }
       }
     }

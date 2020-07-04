@@ -7,7 +7,7 @@ public class KafkaModule implements Module {
 
   @Override
   public void setupModule(SetupContext context) {
-    context.addLifecycleListener(new KafkaListener());
+    context.addLifecycleListener(new KafkaStateManager());
     context.addParameterProvider(new KafkaParameterProvider());
   }
 }
