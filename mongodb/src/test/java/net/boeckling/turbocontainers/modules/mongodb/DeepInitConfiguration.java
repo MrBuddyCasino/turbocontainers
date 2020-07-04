@@ -4,6 +4,7 @@ import static net.boeckling.turbocontainers.api.init.Init.container;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
+import net.boeckling.turbocontainers.api.init.InitializerContext;
 import org.bson.Document;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Network;
@@ -31,7 +32,6 @@ public class DeepInitConfiguration {
         .withEnv("MONGO_INITDB_DATABASE", DB2_NAME)
         .withCommand("--bind_ip_all")
         .dependsOn(CONTAINER_1)
-        .dependsOn()
     )
     .with(DeepInitConfiguration::initialize);
   public static final MongoDBContainer CONTAINER_3 = container(
@@ -42,14 +42,13 @@ public class DeepInitConfiguration {
         .withEnv("MONGO_INITDB_DATABASE", DB3_NAME)
         .withCommand("--bind_ip_all")
         .dependsOn(CONTAINER_2)
-        .dependsOn()
     )
     .with(DeepInitConfiguration::initialize);
 
-  static void initialize(MongoDBContainer container) {
-    String dbName = container.getEnvMap().get("MONGO_INITDB_DATABASE");
-    MongoClient client = createMongoClient(container);
-    client
+  static void initialize(InitializerContext<MongoDBContainer> ctx) {
+    String dbName = ctx.container().getEnvMap().get("MONGO_INITDB_DATABASE");
+    ctx
+      .client(MongoClient.class)
       .getDatabase(dbName)
       .getCollection("collection")
       .insertOne(new Document("key", "value"));

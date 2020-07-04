@@ -8,6 +8,7 @@ import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClientBuilder;
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import net.boeckling.turbocontainers.api.init.InitializerContext;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 
@@ -26,7 +27,8 @@ public class LocalstackConfiguration {
     )
     .with(LocalstackConfiguration::initialize);
 
-  static void initialize(LocalStackContainer container) {
+  static void initialize(InitializerContext<LocalStackContainer> ctx) {
+    LocalStackContainer container = ctx.container();
     // S3
     AmazonS3ClientBuilder
       .standard()
