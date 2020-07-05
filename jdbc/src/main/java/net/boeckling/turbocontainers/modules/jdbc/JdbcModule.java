@@ -7,7 +7,7 @@ public class JdbcModule implements Module {
 
   @Override
   public void setupModule(SetupContext context) {
-    context.addLifecycleListener(new JdbcLifecycleListener());
+    context.addLifecycleListener(new JdbcStateManager());
     context.addParameterProvider(new JdbcParameterProvider());
   }
 }

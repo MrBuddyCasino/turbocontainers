@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 @TurboContainers
-public class JdbcLifecycleListenerTest {
+public class JdbcStateManagerTest {
   @TurboContainer
   private final PostgreSQLContainer<?> postgres =
     PostgresConfiguration.CONTAINER;

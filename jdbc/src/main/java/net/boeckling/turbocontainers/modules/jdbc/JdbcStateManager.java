@@ -4,7 +4,7 @@ import net.boeckling.turbocontainers.state.InitOnceStateManager;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
-public class JdbcLifecycleListener
+public class JdbcStateManager
   implements InitOnceStateManager<JdbcDatabaseContainer<?>> {
 
   @Override
