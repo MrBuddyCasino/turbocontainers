@@ -11,8 +11,13 @@ import java.lang.annotation.Target;
  *
  * @see TurboContainers
  */
-@Target(ElementType.FIELD)
+@Target({ ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface TurboContainer {
-  String name() default "";
+  /**
+   * Disambiguate containers of the same type with a name
+   * in order to decide which should be used for parameter
+   * resolution.
+   */
+  String value() default "";
 }

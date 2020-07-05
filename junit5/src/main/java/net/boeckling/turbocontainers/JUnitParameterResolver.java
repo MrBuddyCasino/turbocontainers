@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import net.boeckling.turbocontainers.api.annotations.Named;
+import net.boeckling.turbocontainers.api.annotations.TurboContainer;
 import net.boeckling.turbocontainers.parameter.*;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -88,8 +88,8 @@ public class JUnitParameterResolver implements ParameterResolver {
       }
     }
 
-    Named named = paramContext
-      .findAnnotation(Named.class)
+    TurboContainer named = paramContext
+      .findAnnotation(TurboContainer.class)
       .orElseThrow(
         () ->
           new ParameterResolutionException(
@@ -97,22 +97,20 @@ public class JUnitParameterResolver implements ParameterResolver {
             paramContext.getDeclaringExecutable() +
             ", found " +
             containers.size() +
-            " potential container matches. Use the " +
-            Named.class.getName() +
-            " annotation to disambiguate."
+            " potential container matches. Assign a container name to disambiguate."
           )
       );
 
     List<Field> annotatedFields = AnnotationUtils.findAnnotatedFields(
       ext.getRequiredTestClass(),
-      Named.class,
-      f -> f.getAnnotation(Named.class).value().equals(named.value())
+      TurboContainer.class,
+      f -> f.getAnnotation(TurboContainer.class).value().equals(named.value())
     );
 
     if (annotatedFields.isEmpty()) {
       throw new ParameterResolutionException(
         "Found " +
-        Named.class.getName() +
+        TurboContainer.class.getName() +
         " annotation on parameter " +
         paramContext.getDeclaringExecutable() +
         " with value " +
@@ -139,7 +137,7 @@ public class JUnitParameterResolver implements ParameterResolver {
 
     throw new ParameterResolutionException(
       "Found " +
-      Named.class.getName() +
+      TurboContainer.class.getName() +
       " annotation on parameter " +
       paramContext.getDeclaringExecutable() +
       " with value " +
