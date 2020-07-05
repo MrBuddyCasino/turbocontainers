@@ -58,6 +58,7 @@ Every container needs explicit support. Currently supported:
 * localstack: S3, SNS, SQS
 * kafka
 * all transactional JdbcDatabaseContainers
+* cassandra
 
 ## Container Initialization
 
@@ -129,8 +130,14 @@ Provides the `MongoScript` tool to run the `mongo` cli.
 
 ### postgres
 Not needed for JDBC-only operations.
+
 Provides a `PsqlScript` class to execute the psql cli tool:
 
         PsqlScript
           .of(Script.of(Paths.get("src/test/resources/psql.sql")))
           .runIn(container);
+          
+### cassandra
+Deletes non-system keyspaces between tests.
+
+Provides `CqlshScript`.

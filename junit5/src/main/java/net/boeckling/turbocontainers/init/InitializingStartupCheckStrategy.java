@@ -1,11 +1,10 @@
 package net.boeckling.turbocontainers.init;
 
+import static net.boeckling.turbocontainers.log.ContainerLogger.logger;
 import static org.testcontainers.containers.startupcheck.StartupCheckStrategy.StartupStatus.SUCCESSFUL;
 
 import com.github.dockerjava.api.DockerClient;
 import java.util.Objects;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Accessor;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
@@ -17,10 +16,6 @@ import org.testcontainers.containers.startupcheck.StartupCheckStrategy;
  */
 public class InitializingStartupCheckStrategy<C extends GenericContainer<?>>
   extends StartupCheckStrategy {
-  private static final Logger LOGGER = LoggerFactory.getLogger(
-    InitializingStartupCheckStrategy.class
-  );
-
   private final C container;
   private final Runnable initializer;
   private final StartupCheckStrategy originalStrategy;
@@ -48,10 +43,8 @@ public class InitializingStartupCheckStrategy<C extends GenericContainer<?>>
         initializer.run();
         hasInitialized = true;
       } catch (RuntimeException e) {
-        LOGGER.error(
-          "Failed to initialize " + container.getDockerImageName(),
-          e
-        );
+        logger(container)
+          .error("Failed to initialize " + container.getDockerImageName(), e);
         return StartupStatus.FAILED;
       }
     }
