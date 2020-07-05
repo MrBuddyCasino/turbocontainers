@@ -3,12 +3,12 @@ package net.boeckling.turbocontainers.modules.kafka;
 import java.util.Properties;
 import net.boeckling.turbocontainers.parameter.ExecutionEnvironment;
 import net.boeckling.turbocontainers.parameter.ParameterDescriptor;
-import net.boeckling.turbocontainers.parameter.SimpleParamProvider;
+import net.boeckling.turbocontainers.parameter.SimpleParameterProvider;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.testcontainers.containers.KafkaContainer;
 
-public class KafkaParameterProvider extends SimpleParamProvider {
+public class KafkaParameterProvider extends SimpleParameterProvider {
   private KafkaConsumer<String, String> consumer;
 
   public KafkaParameterProvider() {

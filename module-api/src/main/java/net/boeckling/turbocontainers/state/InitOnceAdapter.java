@@ -3,8 +3,9 @@ package net.boeckling.turbocontainers.state;
 import net.boeckling.turbocontainers.events.LifecycleEvent;
 import net.boeckling.turbocontainers.events.LifecycleListener;
 import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
 
-public class InitOnceAdapter<C extends Container<?>>
+public class InitOnceAdapter<C extends GenericContainer<?>>
   implements LifecycleListener<C> {
   private final InitOnceStateManager<C> stateManager;
 

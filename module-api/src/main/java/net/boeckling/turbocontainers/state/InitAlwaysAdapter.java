@@ -3,8 +3,9 @@ package net.boeckling.turbocontainers.state;
 import net.boeckling.turbocontainers.events.LifecycleEvent;
 import net.boeckling.turbocontainers.events.LifecycleListener;
 import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
 
-public class InitAlwaysAdapter<C extends Container<?>>
+public class InitAlwaysAdapter<C extends GenericContainer<?>>
   implements LifecycleListener<C> {
   private final InitAlwaysStateManager<C> stateManager;
 

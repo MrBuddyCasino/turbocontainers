@@ -3,10 +3,10 @@ package net.boeckling.turbocontainers.modules.jdbc;
 import javax.sql.DataSource;
 import net.boeckling.turbocontainers.parameter.ExecutionEnvironment;
 import net.boeckling.turbocontainers.parameter.ParameterDescriptor;
-import net.boeckling.turbocontainers.parameter.SimpleParamProvider;
+import net.boeckling.turbocontainers.parameter.SimpleParameterProvider;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
-public class JdbcParameterProvider extends SimpleParamProvider {
+public class JdbcParameterProvider extends SimpleParameterProvider {
   private DataSource ds;
 
   public JdbcParameterProvider() {

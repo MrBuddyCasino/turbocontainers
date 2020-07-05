@@ -2,9 +2,7 @@ package net.boeckling.turbocontainers.modules.postgres;
 
 import static org.testcontainers.containers.PostgreSQLContainer.POSTGRESQL_PORT;
 
-import java.nio.file.Paths;
 import net.boeckling.turbocontainers.api.init.Init;
-import net.boeckling.turbocontainers.modules.cli.Script;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 
@@ -19,10 +17,5 @@ public class PostgresConfiguration {
         .withUsername("postgres")
         .withPassword("postgres")
     )
-    .with(
-      ctx ->
-        PsqlScript
-          .of(Script.of(Paths.get("src/test/resources/psql.sql")))
-          .runIn(ctx.container())
-    );
+    .with(ctx -> ctx.initScript("psql.sql"));
 }

@@ -1,15 +1,12 @@
 package net.boeckling.turbocontainers.modules;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import net.boeckling.turbocontainers.common.ServiceLoaderUtil;
-import net.boeckling.turbocontainers.events.LifecycleListener;
-import net.boeckling.turbocontainers.parameter.ParameterProvider;
-import org.testcontainers.containers.Container;
+import net.boeckling.turbocontainers.parameter.ParameterDescriptor;
+import org.testcontainers.containers.GenericContainer;
 
-public class ModuleRegistry implements SetupContext {
-  private final List<LifecycleListener<? extends Container<?>>> lifecycleListeners = new ArrayList<>();
-  private final List<ParameterProvider> parameterProviders = new ArrayList<>();
+public class ModuleRegistry {
+  private final Map<Class<?>, RegisteredModule> containerToModule = new HashMap<>();
 
   public ModuleRegistry() {
     registerModules();
@@ -17,25 +14,41 @@ public class ModuleRegistry implements SetupContext {
 
   private void registerModules() {
     for (Module module : ServiceLoaderUtil.findServices(Module.class)) {
-      module.setupModule(this);
+      RegisteredModule registeredModule = new RegisteredModule();
+      module.setupModule(registeredModule);
+      for (Class<?> supportedClass : registeredModule.getSupportedClasses()) {
+        containerToModule.put(supportedClass, registeredModule);
+      }
     }
   }
 
-  public List<LifecycleListener<? extends Container<?>>> getLifecycleListeners() {
-    return lifecycleListeners;
+  public Optional<RegisteredModule> findModule(GenericContainer<?> container) {
+    for (Map.Entry<Class<?>, RegisteredModule> entry : containerToModule.entrySet()) {
+      if (entry.getKey().isInstance(container)) {
+        return Optional.of(entry.getValue());
+      }
+    }
+
+    return Optional.empty();
   }
 
-  public List<ParameterProvider> getParameterProviders() {
-    return parameterProviders;
+  public Optional<RegisteredModule> findModuleForParameterType(
+    ParameterDescriptor desc
+  ) {
+    return containerToModule
+      .values()
+      .stream()
+      .filter(
+        mod ->
+          mod
+            .getParameterProviders()
+            .stream()
+            .anyMatch(prov -> prov.supportsParameter(desc))
+      )
+      .findFirst();
   }
 
-  @Override
-  public void addLifecycleListener(LifecycleListener<?> listener) {
-    lifecycleListeners.add(listener);
-  }
-
-  @Override
-  public void addParameterProvider(ParameterProvider paramProvider) {
-    parameterProviders.add(paramProvider);
+  public Collection<RegisteredModule> getAll() {
+    return containerToModule.values();
   }
 }

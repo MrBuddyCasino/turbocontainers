@@ -1,8 +1,8 @@
 package net.boeckling.turbocontainers.events;
 
-import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
 
-public abstract class ContainerEvent<C extends Container<?>> {
+public abstract class ContainerEvent<C extends GenericContainer<?>> {
   private final C container;
 
   protected ContainerEvent(C container) {

@@ -1,10 +1,7 @@
 package net.boeckling.turbocontainers.parameter;
 
-import org.testcontainers.containers.Container;
-
 public interface ParameterProvider {
   boolean supportsParameter(ParameterDescriptor param);
-  boolean supportsContainer(Container<?> type);
 
   Object resolveParameter(ParameterDescriptor param, ExecutionEnvironment env)
     throws ParameterResolutionFailedException;
@@ -19,6 +16,7 @@ public interface ParameterProvider {
       );
     }
 
+    //noinspection unchecked
     return (T) actual;
   }
 }

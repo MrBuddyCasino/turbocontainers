@@ -1,7 +1,7 @@
 package net.boeckling.turbocontainers.events;
 
 import net.boeckling.turbocontainers.modules.ModuleRegistry;
-import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
 
 public class EventPublisherImpl implements EventPublisher {
   private final ModuleRegistry registry;
@@ -10,23 +10,28 @@ public class EventPublisherImpl implements EventPublisher {
     this.registry = registry;
   }
 
-  public <C extends Container<?>> void publishEvent(ContainerEvent<C> event) {
-    for (LifecycleListener<?> listener : registry.getLifecycleListeners()) {
-      if (!listener.supportsContainer(event.getContainer())) {
-        continue;
-      }
+  public <C extends GenericContainer<?>> void publishEvent(
+    ContainerEvent<C> event
+  ) {
+    LifecycleEvent<C> evt = new LifecycleEventImpl<>(event.getContainer());
 
-      @SuppressWarnings("unchecked")
-      LifecycleListener<C> l = (LifecycleListener<C>) listener;
-
-      LifecycleEvent<C> evt = new LifecycleEventImpl<>(event.getContainer());
-      if (event instanceof AfterContainerInitializedEvent) {
-        l.afterContainerInitialized(evt);
-      } else {
-        if (event instanceof BeforeEachTestEvent) {
-          l.beforeEachTest(evt);
+    registry
+      .getAll()
+      .stream()
+      .filter(mod -> mod.supportsContainer(event.getContainer()))
+      .flatMap(mod -> mod.getLifecycleListeners().stream())
+      .forEach(
+        listener -> {
+          //noinspection unchecked
+          LifecycleListener<C> l = (LifecycleListener<C>) listener;
+          if (event instanceof AfterContainerInitializedEvent) {
+            l.afterContainerInitialized(evt);
+          } else {
+            if (event instanceof BeforeEachTestEvent) {
+              l.beforeEachTest(evt);
+            }
+          }
         }
-      }
-    }
+      );
   }
 }

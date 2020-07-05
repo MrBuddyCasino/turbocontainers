@@ -1,8 +1,8 @@
 package net.boeckling.turbocontainers.events;
 
-import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
 
-public interface LifecycleEvent<C extends Container<?>> {
+public interface LifecycleEvent<C extends GenericContainer<?>> {
   C getContainer();
   Runnable getInitializer();
 }

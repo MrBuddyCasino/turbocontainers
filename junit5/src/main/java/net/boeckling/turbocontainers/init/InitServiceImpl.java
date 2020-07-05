@@ -12,12 +12,14 @@ import org.testcontainers.containers.GenericContainer;
 
 public class InitServiceImpl implements InitService {
   private final List<ParameterProvider> paramProviders;
+  private final TurboContainerServiceImpl service;
 
   public InitServiceImpl() {
     TurboContainerServiceImpl service = (TurboContainerServiceImpl) ServiceLoaderUtil.findService(
       JUnitTurboContainerService.class
     );
     this.paramProviders = service.getParamResolver().getParamProviders();
+    this.service = service;
   }
 
   @Override
@@ -28,7 +30,11 @@ public class InitServiceImpl implements InitService {
     Runnable r = () -> {
       // parameter resolution can only happen once the container is started
       initializer.accept(
-        new InitializerContextImpl<>(container, paramProviders)
+        new InitializerContextImpl<>(
+          container,
+          paramProviders,
+          service.findScriptRunner(container)
+        )
       );
     };
     InitializingStartupCheckStrategy.wrapStrategy(container, r);

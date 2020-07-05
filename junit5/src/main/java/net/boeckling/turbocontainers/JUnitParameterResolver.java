@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import net.boeckling.turbocontainers.api.annotations.TurboContainer;
+import net.boeckling.turbocontainers.modules.ModuleRegistry;
+import net.boeckling.turbocontainers.modules.RegisteredModule;
 import net.boeckling.turbocontainers.parameter.*;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -19,13 +21,22 @@ import org.testcontainers.containers.GenericContainer;
 public class JUnitParameterResolver implements ParameterResolver {
   private final List<ParameterProvider> paramProviders;
   private final Function<Optional<Object>, Collection<GenericContainer<?>>> containerProvider;
+  private final ModuleRegistry moduleRegistry;
 
   public JUnitParameterResolver(
-    List<ParameterProvider> paramProviders,
-    Function<Optional<Object>, Collection<GenericContainer<?>>> containerProvider
+    Function<Optional<Object>, Collection<GenericContainer<?>>> containerProvider,
+    ModuleRegistry moduleRegistry
   ) {
-    this.paramProviders = paramProviders;
     this.containerProvider = containerProvider;
+    this.moduleRegistry = moduleRegistry;
+
+    paramProviders =
+      moduleRegistry
+        .getAll()
+        .stream()
+        .map(RegisteredModule::getParameterProviders)
+        .flatMap(Collection::stream)
+        .collect(toList());
   }
 
   @Override
@@ -52,18 +63,28 @@ public class JUnitParameterResolver implements ParameterResolver {
       paramContext.getParameter().getType()
     );
 
-    ParameterProvider paramProvider = paramProviders
-      .stream()
-      .filter(r -> r.supportsParameter(paramDesc))
-      .findFirst()
+    RegisteredModule module = moduleRegistry
+      .findModuleForParameterType(paramDesc)
       .orElseThrow(
-        () -> new ParameterResolutionException("no ParameterProvider found")
+        () ->
+          new ParameterResolutionException(
+            "No module found from which to construct a " +
+            paramContext.getParameter().getType().getName()
+          )
       );
+
+    //noinspection OptionalGetWithoutIsPresent
+    ParameterProvider paramProvider = module
+      .getParameterProviders()
+      .stream()
+      .filter(prov -> prov.supportsParameter(paramDesc))
+      .findFirst()
+      .get();
 
     List<GenericContainer<?>> containers = containerProvider
       .apply(ext.getTestInstance())
       .stream()
-      .filter(paramProvider::supportsContainer)
+      .filter(module::supportsContainer)
       .collect(toList());
 
     if (containers.isEmpty()) {

@@ -18,6 +18,8 @@ import net.boeckling.turbocontainers.events.EventPublisherImpl;
 import net.boeckling.turbocontainers.init.EventEmittingStartupCheckStrategy;
 import net.boeckling.turbocontainers.init.InitializingStartupCheckStrategy;
 import net.boeckling.turbocontainers.modules.ModuleRegistry;
+import net.boeckling.turbocontainers.modules.RegisteredModule;
+import net.boeckling.turbocontainers.script.ScriptRunner;
 import org.junit.jupiter.api.extension.*;
 import org.junit.platform.commons.support.AnnotationSupport;
 import org.junit.platform.commons.util.AnnotationUtils;
@@ -52,14 +54,15 @@ public class TurboContainerServiceImpl implements JUnitTurboContainerService {
   private final EventPublisher eventPublisher;
 
   private final JUnitParameterResolver paramResolver;
+  private final ModuleRegistry moduleRegistry;
 
   public TurboContainerServiceImpl() {
-    ModuleRegistry listeners = new ModuleRegistry();
-    eventPublisher = new EventPublisherImpl(listeners);
+    moduleRegistry = new ModuleRegistry();
+    eventPublisher = new EventPublisherImpl(moduleRegistry);
     paramResolver =
       new JUnitParameterResolver(
-        listeners.getParameterProviders(),
-        this::findContainersWithDependencies
+        this::findContainersWithDependencies,
+        moduleRegistry
       );
   }
 
@@ -94,6 +97,14 @@ public class TurboContainerServiceImpl implements JUnitTurboContainerService {
       InitializingStartupCheckStrategy.wrapStrategy(container);
     }
     EventEmittingStartupCheckStrategy.wrapStrategy(container, eventPublisher);
+  }
+
+  public Optional<ScriptRunner> findScriptRunner(
+    GenericContainer<?> container
+  ) {
+    return moduleRegistry
+      .findModule(container)
+      .flatMap(RegisteredModule::getScriptRunner);
   }
 
   private List<GenericContainer<?>> findContainers(

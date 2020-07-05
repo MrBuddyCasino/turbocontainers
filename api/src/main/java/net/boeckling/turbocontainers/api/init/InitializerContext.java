@@ -12,4 +12,9 @@ public interface InitializerContext<C extends GenericContainer<?>> {
    * A factory for clients, eg DataSource or MongoClient.
    */
   <S> S client(Class<S> clazz);
+
+  /**
+   * Run a database initialization script.
+   */
+  void initScript(String resource);
 }

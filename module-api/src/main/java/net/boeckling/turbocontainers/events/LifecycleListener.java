@@ -2,8 +2,9 @@ package net.boeckling.turbocontainers.events;
 
 import java.util.function.Consumer;
 import org.testcontainers.containers.Container;
+import org.testcontainers.containers.GenericContainer;
 
-public interface LifecycleListener<C extends Container<?>> {
+public interface LifecycleListener<C extends GenericContainer<?>> {
   boolean supportsContainer(Container<?> container);
 
   /**
@@ -24,7 +25,7 @@ public interface LifecycleListener<C extends Container<?>> {
   /**
    * Creates an init-only listener.
    */
-  static <C extends Container<?>> LifecycleListener<C> of(
+  static <C extends GenericContainer<?>> LifecycleListener<C> of(
     Class<?> supportedType,
     Consumer<C> initializer
   ) {

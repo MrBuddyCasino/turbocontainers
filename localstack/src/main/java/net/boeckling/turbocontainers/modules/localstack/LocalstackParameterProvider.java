@@ -7,18 +7,12 @@ import net.boeckling.turbocontainers.parameter.ExecutionEnvironment;
 import net.boeckling.turbocontainers.parameter.ParameterDescriptor;
 import net.boeckling.turbocontainers.parameter.ParameterProvider;
 import net.boeckling.turbocontainers.parameter.ParameterResolutionFailedException;
-import org.testcontainers.containers.Container;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sqs.SqsClient;
 
 public class LocalstackParameterProvider implements ParameterProvider {
-
-  @Override
-  public boolean supportsContainer(Container<?> container) {
-    return container instanceof LocalStackContainer;
-  }
 
   @Override
   public boolean supportsParameter(ParameterDescriptor param) {

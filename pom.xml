@@ -195,6 +195,16 @@
         <artifactId>localstack</artifactId>
         <version>${testcontainer-version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>cassandra</artifactId>
+        <version>${testcontainer-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>database-commons</artifactId>
+        <version>${testcontainer-version}</version>
+      </dependency>
 
       <dependency>
         <groupId>org.awaitility</groupId>
