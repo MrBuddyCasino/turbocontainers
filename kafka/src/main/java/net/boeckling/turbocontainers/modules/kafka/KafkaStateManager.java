@@ -1,19 +1,14 @@
 package net.boeckling.turbocontainers.modules.kafka;
 
-import static org.awaitility.Awaitility.await;
-import static org.testcontainers.containers.KafkaContainer.ZOOKEEPER_PORT;
+import static org.apache.kafka.clients.admin.AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG;
 
-import java.time.Duration;
+import java.util.Properties;
 import java.util.Set;
-import kafka.zk.AdminZkClient;
-import kafka.zk.KafkaZkClient;
-import kafka.zookeeper.ZooKeeperClient;
+import java.util.concurrent.ExecutionException;
 import net.boeckling.turbocontainers.state.InitAlwaysStateManager;
-import org.apache.kafka.common.errors.UnknownTopicOrPartitionException;
-import org.apache.kafka.common.utils.Time;
+import org.apache.kafka.clients.admin.Admin;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.KafkaContainer;
-import scala.collection.JavaConverters;
 
 public class KafkaStateManager
   implements InitAlwaysStateManager<KafkaContainer> {
@@ -25,52 +20,13 @@ public class KafkaStateManager
 
   @Override
   public void wipe(KafkaContainer container) {
-    try (KafkaZkClient client = createKafkaZkClient(container)) {
-      Set<String> topicsToDelete = JavaConverters.asJava(
-        client.getAllTopicsInCluster()
-      );
+    Properties props = new Properties();
+    props.put(BOOTSTRAP_SERVERS_CONFIG, container.getBootstrapServers());
 
-      for (String topic : topicsToDelete) {
-        deleteTopic(topic, client);
-      }
-    }
-  }
-
-  private KafkaZkClient createKafkaZkClient(KafkaContainer kafkaContainer) {
-    Integer zkPort = kafkaContainer.getMappedPort(ZOOKEEPER_PORT);
-    String zkHost = kafkaContainer.getHost();
-
-    ZooKeeperClient client = new ZooKeeperClient(
-      zkHost + ":" + zkPort,
-      Integer.MAX_VALUE,
-      5000,
-      10,
-      Time.SYSTEM,
-      "metricGroup",
-      "metricType"
-    );
-
-    return new KafkaZkClient(client, false, Time.SYSTEM);
-  }
-
-  private void deleteTopic(String topic, KafkaZkClient zkClient) {
-    AdminZkClient adminZkClient = new AdminZkClient(zkClient);
-
-    // deletions take a while to become effective
-    try {
-      await()
-        .atMost(Duration.ofSeconds(30))
-        .pollInterval(Duration.ofMillis(100))
-        .until(
-          () -> {
-            try {
-              adminZkClient.deleteTopic(topic);
-            } catch (UnknownTopicOrPartitionException ignored) {}
-
-            return zkClient.topicExists(topic);
-          }
-        );
-    } catch (Exception e) {
+    try (Admin admin = Admin.create(props)) {
+      Set<String> topics = admin.listTopics().names().get();
+      admin.deleteTopics(topics);
+    } catch (ExecutionException | InterruptedException e) {
       throw new RuntimeException(e);
     }
   }
