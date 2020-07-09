@@ -2,7 +2,7 @@ package net.boeckling.turbocontainers.api.init;
 
 import org.testcontainers.containers.GenericContainer;
 
-public interface InitializerContext<C extends GenericContainer<?>> {
+public interface InitializerContext<C extends GenericContainer> {
   /**
    * Current container instance.
    */

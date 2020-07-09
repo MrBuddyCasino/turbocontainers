@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import org.testcontainers.containers.Container;
 import org.testcontainers.containers.GenericContainer;
 
-public interface LifecycleListener<C extends GenericContainer<?>> {
+public interface LifecycleListener<C extends GenericContainer> {
   boolean supportsContainer(Container<?> container);
 
   /**

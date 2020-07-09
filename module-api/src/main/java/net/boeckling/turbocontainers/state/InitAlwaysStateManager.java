@@ -7,7 +7,7 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * Wipe completely, then re-init.
  */
-public interface InitAlwaysStateManager<C extends GenericContainer<?>>
+public interface InitAlwaysStateManager<C extends GenericContainer>
   extends ToLifecycleListener<C> {
   boolean supportsContainer(Container<?> container);
 

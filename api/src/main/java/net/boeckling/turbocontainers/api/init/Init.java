@@ -9,11 +9,11 @@ import org.testcontainers.containers.GenericContainer;
  * Convenience helper to initialise a container with some data before test are run.
  */
 public interface Init {
-  static <C extends GenericContainer<?>> Builder<C> container(C container) {
+  static <C extends GenericContainer> Builder<C> container(C container) {
     return new Builder<>(container);
   }
 
-  class Builder<C extends GenericContainer<?>> {
+  class Builder<C extends GenericContainer> {
     private final C container;
 
     public Builder(C container) {

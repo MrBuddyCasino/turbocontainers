@@ -10,12 +10,12 @@ import net.boeckling.turbocontainers.script.ScriptRunner;
 import org.testcontainers.containers.GenericContainer;
 
 public class RegisteredModule implements SetupContext {
-  private final List<LifecycleListener<? extends GenericContainer<?>>> lifecycleListeners = new ArrayList<>();
+  private final List<LifecycleListener<? extends GenericContainer>> lifecycleListeners = new ArrayList<>();
   private final List<ParameterProvider> parameterProviders = new ArrayList<>();
   private final List<Class<?>> supportedClasses = new ArrayList<>();
   private ScriptRunner scriptRunner;
 
-  public List<LifecycleListener<? extends GenericContainer<?>>> getLifecycleListeners() {
+  public List<LifecycleListener<? extends GenericContainer>> getLifecycleListeners() {
     return lifecycleListeners;
   }
 
