@@ -141,3 +141,6 @@ Provides a `PsqlScript` class to execute the psql cli tool:
 Deletes non-system keyspaces between tests.
 
 Provides `CqlshScript`.
+
+### Clickhouse
+Deletes databases, truncates `default` database.

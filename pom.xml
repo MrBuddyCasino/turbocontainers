@@ -56,6 +56,7 @@
     <module>common</module>
     <module>localstack</module>
     <module>cassandra</module>
+    <module>clickhouse</module>
   </modules>
 
   <build>
@@ -204,6 +205,16 @@
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>database-commons</artifactId>
+        <version>${testcontainer-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>clickhouse</artifactId>
+        <version>${testcontainer-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>kafka</artifactId>
         <version>${testcontainer-version}</version>
       </dependency>
 
