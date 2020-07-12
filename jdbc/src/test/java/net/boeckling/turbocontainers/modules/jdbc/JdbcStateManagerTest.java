@@ -13,20 +13,13 @@ import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
 
 @TurboContainers
-public class JdbcStateManagerTest {
-  @TurboContainer
-  private final PostgreSQLContainer<?> postgres =
-    PostgresConfiguration.CONTAINER;
+public abstract class JdbcStateManagerTest {
 
   @Test
   void database_shouldRunInitialization_whenStarting(DataSource ds)
     throws SQLException {
-    String sql =
-      "SELECT COUNT(table_name) AS cnt " +
-      "FROM information_schema.tables " +
-      "WHERE table_schema = 'public' " +
-      "AND table_name='books'";
-    ResultSet rs = query(ds, sql);
+    String query = "SELECT COUNT(*) AS cnt FROM books";
+    ResultSet rs = query(ds, query);
     assertThat(rs.getInt("cnt")).isEqualTo(1);
   }
 
@@ -35,15 +28,17 @@ public class JdbcStateManagerTest {
   void dataSource_shouldKeepDataVisible_WhenWithinTest(DataSource ds)
     throws SQLException {
     Connection conn = ds.getConnection();
-    conn.setAutoCommit(true);
+    conn.setAutoCommit(true); // this shouldn't work
     conn
-      .prepareStatement("INSERT INTO books (name) VALUES ('Meditations')")
+      .prepareStatement(
+        "INSERT INTO books (year, name) VALUES (2012, 'Antifragile')"
+      )
       .execute();
-    conn.commit();
+    conn.commit(); // this neither
 
     String query = "SELECT COUNT(*) AS cnt FROM books";
     ResultSet rs = query(ds, query);
-    assertThat(rs.getInt("cnt")).isEqualTo(1);
+    assertThat(rs.getInt("cnt")).isEqualTo(2);
   }
 
   @Test
@@ -54,7 +49,7 @@ public class JdbcStateManagerTest {
     throws SQLException {
     String query = "SELECT COUNT(*) AS cnt FROM books";
     ResultSet rs = query(ds, query);
-    assertThat(rs.getInt("cnt")).isEqualTo(0);
+    assertThat(rs.getInt("cnt")).isEqualTo(1);
   }
 
   private ResultSet query(DataSource ds, String sql) throws SQLException {

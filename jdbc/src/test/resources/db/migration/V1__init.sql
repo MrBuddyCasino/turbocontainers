@@ -1,4 +1,6 @@
 CREATE TABLE books (
-    id      SERIAL PRIMARY KEY,
-    name    TEXT NOT NULL
+    year    INTEGER,
+    name    VARCHAR(255)
 );
+
+INSERT INTO books (year, name) VALUES (178, 'Meditations')

@@ -53,12 +53,16 @@ to implement correctly.
 
 Every container needs explicit support. Currently supported:
 
-* postgresql
-* mongodb
-* localstack: S3, SNS, SQS
-* kafka
-* all transactional JdbcDatabaseContainers
-* cassandra
+* MariaDB
+* MS SQL Server
+* MySQL
+* PostgreSQL
+* Prestosql
+* MongoDB
+* Localstack: S3, SNS, SQS
+* Kafka
+* Cassandra
+* Most containers based on `JdbcDatabaseContainer` should work 
 
 ## Container Initialization
 
