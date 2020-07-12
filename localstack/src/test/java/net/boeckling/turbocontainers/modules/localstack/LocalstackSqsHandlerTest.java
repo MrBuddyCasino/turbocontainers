@@ -8,7 +8,6 @@ import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import net.boeckling.turbocontainers.api.annotations.TurboContainer;
 import net.boeckling.turbocontainers.api.annotations.TurboContainers;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.localstack.LocalStackContainer;
@@ -43,7 +42,6 @@ public class LocalstackSqsHandlerTest {
 
   @Test
   @Order(4)
-  @Disabled
   void clientv2_shouldQueryData_successfully(SqsClient sqs) {
     assertThat(sqs.getQueueUrl(b -> b.queueName(INIT_QUEUE_NAME)).queueUrl())
       .isNotBlank();

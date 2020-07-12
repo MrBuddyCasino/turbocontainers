@@ -18,7 +18,7 @@ public class LocalstackConfiguration {
   public static final String INIT_QUEUE_NAME = "init-queue";
 
   static final LocalStackContainer CONTAINER = container(
-      new LocalStackContainer("0.11.3")
+      new LocalStackContainer("latest")
         .withNetwork(Network.SHARED)
         .withNetworkAliases("localstack")
         .withEnv("HOSTNAME_EXTERNAL", "localhost")
